@@ -31,6 +31,20 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      - name: Configure Kotlin JVM target
+        run: |
+          cd project
+          DIR=$(find . -name settings.gradle.kts -printf '%h\n' | head -n 1)
+          cd "$DIR"
+          APP_GRADLE="app/build.gradle.kts"
+          if [ ! -f "$APP_GRADLE" ]; then echo "app/build.gradle.kts not found"; exit 1; fi
+          cat >> "$APP_GRADLE" <<'EOF'
+
+          tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+              kotlinOptions.jvmTarget = "17"
+          }
+          EOF
+
       - name: Build APK
         run: |
           cd project
