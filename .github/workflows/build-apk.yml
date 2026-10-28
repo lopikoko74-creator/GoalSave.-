@@ -31,7 +31,7 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Configure Java and Kotlin JVM target
+      - name: Configure JVM targets
         run: |
           cd project
           DIR=$(find . -name settings.gradle.kts -printf '%h\n' | head -n 1)
@@ -44,8 +44,21 @@ jobs:
                   targetCompatibility = JavaVersion.VERSION_17
               }
           }
-
           tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
               kotlinOptions.jvmTarget = "17"
           }
           EOF
+
+      - name: Build APK
+        run: |
+          cd project
+          DIR=$(find . -name settings.gradle.kts -printf '%h\n' | head -n 1)
+          cd "$DIR"
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoalSaver-APK
+          path: project/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
